@@ -36,6 +36,7 @@ static pt::ptime goal;
 static pt::ptime last_shot;
 static cv::VideoWriter *video_writer;
 static ICamera *camera;
+static bool capture_enabled = true;
 
 boost::posix_time::time_facet *facet;
 
@@ -170,7 +171,7 @@ static void capture_thread(Config &config, Display &display)
         {
             const pt::ptime current = pt::microsec_clock::local_time();
             
-            if(current >= goal)
+            if(current >= goal && capture_enabled)
             {
                 cout << "Taking picture!" << endl;
                 
@@ -249,7 +250,6 @@ int main(int argc, char *argv[])
 
     signal(SIGINT, signal_handler);
 
-    bool enabled = true;
     try
     {
         Config config(config_filename);
@@ -285,7 +285,7 @@ int main(int argc, char *argv[])
             r.y = 0;
             r.w = 120;
             r.h = 40;
-            if(enabled)
+            if(capture_enabled)
             {
                 input.add_region(Action::DISABLE, r);
                 
@@ -316,12 +316,12 @@ int main(int argc, char *argv[])
                 break;
             case Action::ENABLE:
                 cout << "Got enable" << endl;
-                enabled = true;
+                capture_enabled = true;
                 input.remove_region(Action::ENABLE);
                 break;
             case Action::DISABLE:
                 cout << "Got disable" << endl;
-                enabled = false;
+                capture_enabled = false;
                 input.remove_region(Action::DISABLE);
                 break;
             case Action::DELETE_LAST:
