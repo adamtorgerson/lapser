@@ -248,22 +248,18 @@ int main(int argc, char *argv[])
     }
 
     signal(SIGINT, signal_handler);
-    
+
+    bool enabled = true;
     try
     {
         Config config(config_filename);
 
         Display display(config);
         Input input(display);
-        SDL_Rect r;
-        r.x = 200;
-        r.y = 0;
-        r.w = 120;
-        r.h = 40;
-        input.add_region(Action::ENABLE, r);
-        r.x = 200;
-        r.y = 200;
-        input.add_region(Action::DELETE_LAST, r);
+        
+        //r.x = 200;
+        //r.y = 200;
+        //input.add_region(Action::DELETE_LAST, r);
         
         cv::Mat frame(config.get_capture_height(), config.get_capture_width(), CV_8UC3);
         boost::thread cap_thread(&capture_thread, config, display);
@@ -284,18 +280,34 @@ int main(int argc, char *argv[])
             }
             display.put_frame(frame);
 
+            SDL_Rect r;
+            r.x = 200;
+            r.y = 0;
+            r.w = 120;
+            r.h = 40;
+            if(enabled)
+            {
+                input.add_region(Action::DISABLE, r);
+                
+                ostringstream oss;
+                oss << "Next shot in: ";
+                const pt::time_duration remaining = goal - current;
+                oss << remaining.seconds() << "." << remaining.fractional_seconds() / (int)pow(10, remaining.num_fractional_digits() - 1);
+                display.put_string(oss.str(), 0, -1);
+            }
+            else
+            {
+                input.add_region(Action::ENABLE, r);
+                
+                display.put_string("Time lapse disabled", 0, -1);
+            }
+
+            // display current time
             ostringstream oss;
-            oss << "Next shot in: ";
-            const pt::time_duration remaining = goal - current;
-            oss << remaining.seconds() << "." << remaining.fractional_seconds() / (int)pow(10, remaining.num_fractional_digits() - 1);
-            display.put_string(oss.str(), 0, -1);
-            ostringstream oss2;
-            oss.clear();
-            oss.str("");
             oss.imbue(locale(cout.getloc(), facet));
             oss << last_shot << "." << last_shot.time_of_day().fractional_seconds() / (int)pow(10, last_shot.time_of_day().num_fractional_digits() - 1);
             display.put_string(oss.str());
-
+            
             Action::Action a = input.process();
             switch(a)
             {
@@ -304,9 +316,13 @@ int main(int argc, char *argv[])
                 break;
             case Action::ENABLE:
                 cout << "Got enable" << endl;
+                enabled = true;
+                input.remove_region(Action::ENABLE);
                 break;
             case Action::DISABLE:
                 cout << "Got disable" << endl;
+                enabled = false;
+                input.remove_region(Action::DISABLE);
                 break;
             case Action::DELETE_LAST:
                 cout << "Got delete" << endl;

@@ -59,6 +59,15 @@ public:
         return true;
     }
 
+    bool remove_region(const Action::Action action)
+    {
+        if(map_.find(action) == map_.end())
+            return false;
+        
+        map_.erase(action);
+        return true;
+    }
+    
     void draw_regions()
     {
         ActionMap::const_iterator i;
@@ -69,6 +78,10 @@ public:
             {
             case Action::ENABLE:
                 s = "Enable";
+                display_.put_button(s, i->second);
+                break;
+            case Action::DISABLE:
+                s = "Disable";
                 display_.put_button(s, i->second);
                 break;
             case Action::DELETE_LAST:
@@ -105,6 +118,11 @@ Action::Action Input::process()
 bool Input::add_region(const Action::Action action, const SDL_Rect &r)
 {
     return impl_->add_region(action, r);
+}
+
+bool Input::remove_region(const Action::Action action)
+{
+    return impl_->remove_region(action);
 }
 
 void Input::draw_regions()

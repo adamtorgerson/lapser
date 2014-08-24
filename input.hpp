@@ -25,6 +25,7 @@ public:
     Action::Action process();
 
     bool add_region(const Action::Action action, const SDL_Rect &r);
+    bool remove_region(const Action::Action action);
     void draw_regions();
     
 private:
