@@ -19,6 +19,7 @@ public:
     int get_display_height();
     int get_output_width();
     int get_output_height();
+    bool get_output_date();
     int get_font_size();
     int get_font_color();
     bool get_light_enable();

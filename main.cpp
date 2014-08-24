@@ -142,6 +142,7 @@ static void capture_thread(Config &config, Display &display)
     try
     {
         const int interval = config.get_interval();
+        const bool output_date = config.get_output_date();
         //cout << "interval: " << interval << endl;
     
         cv::Mat frame(config.get_capture_height(), config.get_capture_width(), CV_8UC3);
@@ -202,6 +203,14 @@ static void capture_thread(Config &config, Display &display)
                                                        desired);
                 }
 
+                if(output_date)
+                {
+                    ostringstream oss;
+                    oss.imbue(locale(cout.getloc(), facet));
+                    oss << last_shot << "." << current.time_of_day().fractional_seconds() / (int)pow(10, current.time_of_day().num_fractional_digits() - 1);
+                    display.put_string(frame, oss.str());
+                }
+                
                 if(desired != frame.size())
                 {
                     cv::Mat vid_frame;

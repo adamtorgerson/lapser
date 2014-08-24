@@ -78,6 +78,11 @@ public:
         return root_.get("output-height", 768).asInt();
     }
     
+    bool get_output_date()
+    {
+        return root_.get("output-date", false).asBool();
+    }
+    
     int get_font_size()
     {
         return root_.get("font-size", 18).asInt();
@@ -140,6 +145,9 @@ int Config::get_output_width()
 
 int Config::get_output_height()
 { return impl_->get_output_height(); }
+
+bool Config::get_output_date()
+{ return impl_->get_output_date(); }
 
 int Config::get_font_size()
 { return impl_->get_font_size(); }
