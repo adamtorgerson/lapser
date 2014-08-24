@@ -1,13 +1,15 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <stdio.h> 
+#include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <opencv2/highgui/highgui.hpp>
 
 extern "C"
 {
 #include "bcm_host.h"
-#include <bcm2835.h>
 #include "interface/vcos/vcos.h"
 
 #include "interface/mmal/mmal.h"
@@ -134,13 +136,50 @@ public:
             cout << "Failed to connect camera to preview" << endl;
         }
 
+        ostringstream oss;
+        const int ex_fd = open("/sys/class/gpio/export", O_WRONLY);
+        if(ex_fd > 0)
+        {
+            oss << "5";
+            write(ex_fd, oss.str().c_str(), oss.str().size());
+            close(ex_fd);
+
+            oss.str("");
+            oss << "/sys/class/gpio/gpio" << 5 << "/direction";
+            const int dir_fd = open(oss.str().c_str(), O_WRONLY);
+            oss.str("");
+            oss << "out";
+            write(dir_fd, oss.str().c_str(), oss.str().size());
+            close(dir_fd);
+
+            oss.str("");
+            oss << "/sys/class/gpio/gpio" << 5 << "/value";
+            const int set_fd = open(oss.str().c_str(), O_WRONLY);
+            oss.str("");
+            if(light_enable)
+            {
+                oss << "1";
+            }
+            else
+            {
+                oss << "0";
+            }
+            write(set_fd, oss.str().c_str(), oss.str().size());
+            close(set_fd);
+            
+        }
+        else
+        {
+            cout << "Failed to open /sys/class/gpio/export for camera light control" << endl;
+        }
+        
         strncpy(filename_, "lapserXXXXXX", sizeof("lapserXXXXXX"));
         mktemp(filename_);
     }
 
     ~CameraMMALImpl()
     {
-
+        
     }
 
     bool read_frame(cv::Mat &frame)
@@ -580,6 +619,7 @@ private:
     char filename_[256];
     
     PORT_USERDATA callback_data_;
+    const bool light_enable_;
 };
 
 CameraMMAL::CameraMMAL(const string path, const bool light_enable)
