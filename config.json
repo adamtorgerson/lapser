@@ -1,0 +1,17 @@
+{
+  "interval" : 5000,
+  "capture-name" : "tree.avi",
+  "capture-width" : 1920,
+  "capture-height" : 1080,
+  "display-width" : 320,
+  "display-height" : 240,
+  "output-frames" : 0,
+  "output-width" : 1920,
+  "output-height" : 1080,
+  "output-name" : "out.avi",
+  "output-date" : true,
+  "font-name" : "font.ttf",
+  "font-size" : 18,
+  "font-color" : 16711680,
+  "light-enable" : false
+}
