@@ -1,14 +1,21 @@
 
+# PC Build (only can use opencv testing mode)
 set(ARCH "")
+# Pi Build (Physical Camera [MMAL] support)
+#set(ARCH ARM)
+
+# you need to checkout the pi userland git repo, and set the path here
+# https://github.com/raspberrypi/userland.git
+set(PI_USERLAND_PATH ../userland)
 
 if(ARCH STREQUAL ARM)
   set(ARCH_CFLAGS "-march=armv6j -mfpu=vfp -mfloat-abi=hard")
   set(MMAL_SOURCES camera-mmal.cpp RaspiStuff.c)
   set(MMAL_LIBS mmal_core mmal_util mmal_vc_client vcos bcm_host)
-  set(MMAL_INC ../userland/host_applications/linux/apps/raspicam ../userland ../userland/host_applications/linux/libs/bcm_host/include ../userland/build/inc/interface/vcos ../userland/interface/vmcs_host/linux)
+  set(MMAL_INC ${PI_USERLAND_PATH}/host_applications/linux/apps/raspicam ${PI_USERLAND_PATH} ${PI_USERLAND_PATH}/host_applications/linux/libs/bcm_host/include ${PI_USERLAND_PATH}/build/inc/interface/vcos ${PI_USERLAND_PATH}/interface/vmcs_host/linux)
   set(USE_MMAL -DARM_BUILD)
 else()
-  set(ARCH_CFLAGS)
+  set(ARCH_CFLAGS "-pthread")
   set(MMAL_SOURCES)
   set(MMAL_LIBS)
   set(MMAL_INC)
